@@ -14,6 +14,9 @@ fi
 old_server=$OLD_SERVER
 new_server=$NEW_SERVER
 ssh_user=$SSH_USER
+db_root_password=$DB_ROOT_PASSWORD
+admin_password=$ADMIN_PASSWORD
+
 echo "Old Server IP: $old_server"
 echo "new Server IP: $new_server"
 echo "ssh user: $ssh_user"
@@ -59,7 +62,7 @@ echo "Private File: $private_file"
 # Create  the new site
 
 ssh $ssh_user@$new_server "cd ~/frappe-bench && \
-    bench new-site $new_site && \
+    bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password  && \
     bench --site $new_site install-app erpnext && \
     bench --site $new_site install-app hrms"
 
@@ -78,7 +81,7 @@ ssh $ssh_user@$old_server "scp ~/frappe-bench/sites/$old_site/private/backups/* 
 # Function to perform restore and migration
 perform_migration() {
     ssh $ssh_user@$new_server "cd ~/frappe-bench && \
-        bench --site $new_site --force restore sites/$new_site/private/$database_file && \
+        bench --site $new_site --force restore sites/$new_site/private/$database_file --db-root-password $db_root_password && \
         bench --site $new_site migrate"
 
     check_success "Restore and Migration"
