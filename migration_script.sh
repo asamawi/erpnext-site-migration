@@ -104,8 +104,8 @@ copy_encryption_key() {
             ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
             echo "Replaced key '$key' with value '$value' in $dest_file"
         else
-            # If the key doesn't exist in the destination, append it to the end of the file
-            ssh $ssh_user@$new_server "echo \"\\\"$key\\\": \\\"$value\\\",\" >> $dest_file"
+            # If the key doesn't exist in the destination, append it to the end of the file before the last curly brace
+            ssh $ssh_user@$new_server "sed -i '/}/i \ \ \ \ \"$key\": \"$value\",' $dest_file"
             echo "Appended key '$key' with value '$value' to $dest_file"
         fi
     else
