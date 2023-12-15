@@ -96,8 +96,15 @@ copy_encryption_key() {
     # Checking if the key exists in the source file
     if [ -n "$value" ]; then
         # Inserting key-value pair into the destination JSON file
-        ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
-        echo "Inserted key '$key' with value '$value' into $dest_file"
+        if grep -q "\"$key\"" "$dest_file"; then
+            # If the key exists in the destination, replace its value
+            ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
+            echo "Replaced key '$key' with value '$value' in $dest_file"
+        else
+            # If the key doesn't exist in the destination, append it to the end of the file
+            ssh $ssh_user@$new_server "echo \"\\\"$key\\\": \\\"$value\\\",\" >> $dest_file"
+            echo "Appended key '$key' with value '$value' to $dest_file"
+        fi
     else
         echo "Key '$key' not found in $source_file"
     fi
