@@ -115,9 +115,8 @@ clean_backup() {
     # Remove all files inside the backups directory on the old server
     ssh frappe@$old_server "rm -rf ~/frappe-bench/sites/$old_site/private/backups/*"
 
-    # Enable extended globbing and remove all files except 'files' and 'backups' directories on the new server
-    shopt -s extglob
-    ssh frappe@$new_server "rm -rf !(files|backups) ~/frappe-bench/sites/$new_site/private/"
+    # Remove all files except 'files' and 'backups' directories on the new server
+    ssh frappe@$new_server "find ~/frappe-bench/sites/$new_site/private/ -mindepth 1 -maxdepth 1 -type d ! -name 'files' ! -name 'backups' -exec rm -rf {} +"
 
     check_success "Cleaning Backup"
 }
