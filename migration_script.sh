@@ -91,7 +91,7 @@ copy_encryption_key() {
     key="encryption_key"                                                           # Key to extract from source JSON file
 
     # Extracting value corresponding to the provided key from the source JSON file
-    value=$(ssh $ssh_user@$new_server "cat $source_file | grep -Po '\"$key\":\\s*\"\\K[^\"]*'")
+    value=$(ssh $ssh_user@$new_server "grep -Po '\"encryption_key\":\\s*\"\\K[^\"]*' $source_file")
 
     # Checking if the key exists in the source file
     if [ -n "$value" ]; then
