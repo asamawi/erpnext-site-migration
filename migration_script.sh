@@ -112,10 +112,17 @@ copy_encryption_key() {
     check_success "Copying Encryption Key"
 }
 
+clean_backup() {
+    ssh frappe@$old_server "rm -rf ~/frappe-bench/sites/$old_site/private/backups/*"
+
+    check_success "Cleaning Backup"
+}
+
 # Call functions
 perform_backup
 perform_migration
 copy_encryption_key
+clean_backup
 
 # Step 3: Update DNS Records
 # Step 4: Setup Let's Encrypt SSL Certificate
