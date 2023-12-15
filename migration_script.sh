@@ -96,20 +96,15 @@ copy_encryption_key() {
     # Extracting value corresponding to the provided key from the source JSON file
     value=$(ssh $ssh_user@$new_server "grep -Po '\"encryption_key\":\\s*\"\\K[^\"]*' $source_file")
 
-    # Checking if the key exists in the source file
-    if [ -n "$value" ]; then
-        # Inserting key-value pair into the destination JSON file
-        if grep -q "\"$key\"" "$dest_file"; then
-            # If the key exists in the destination, replace its value
-            ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
-            echo "Replaced key '$key' with value '$value' in $dest_file"
-        else
-            # If the key doesn't exist in the destination, append it to the end of the file before the last curly brace
-            ssh $ssh_user@$new_server "sed -i '/}/i \ \ \ \ \"$key\": \"$value\",' $dest_file"
-            echo "Appended key '$key' with value '$value' to $dest_file"
-        fi
+    # Check if the key exists in the destination file on the remote server
+    if ssh $ssh_user@$new_server "grep -q '\"$key\"' \"$dest_file\""; then
+        # If the key exists, replace its value in the destination JSON file
+        ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
+        echo "Replaced key '$key' with value '$value' in $dest_file"
     else
-        echo "Key '$key' not found in $source_file"
+        # Insert the key-value pair into the destination JSON file before the last curly brace
+        ssh $ssh_user@$new_server "sed -i '/}/i \ \ \ \ \"$key\": \"$value\"' $dest_file"
+        echo "Appended key '$key' with value '$value' to $dest_file"
     fi
 
     check_success "Copying Encryption Key"
