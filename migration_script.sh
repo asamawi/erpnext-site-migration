@@ -16,18 +16,12 @@ new_server=$NEW_SERVER
 ssh_user=$SSH_USER
 db_root_password=$DB_ROOT_PASSWORD
 admin_password=$ADMIN_PASSWORD
-
-echo "Old Server IP: $old_server"
-echo "new Server IP: $new_server"
-echo "ssh user: $ssh_user"
 old_site=$1
 if [ $# -eq 1 ]; then
     new_site=$old_site
 else
     new_site=$2
 fi
-
-backup_dir="sites/$old_site/private/backups"
 
 # Function to check if the last command was successful
 check_success() {
@@ -36,7 +30,14 @@ check_success() {
         exit 1
     fi
 }
-
+# function to Create the new site
+create_new_site() {
+ssh $ssh_user@$new_server "cd ~/frappe-bench && \
+    bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password  && \
+    bench --site $new_site install-app erpnext && \
+    bench --site $new_site install-app hrms"
+check_success "New Site Creation"
+}
 # Function to perform backup
 perform_backup() {
     # Run the backup command and capture the output
@@ -45,7 +46,7 @@ perform_backup() {
         bench --site $old_site set-maintenance-mode on && \
         bench --site $old_site backup --with-files --compress")
 
-   # Extract timestamp and filenames from the backup output
+# Extract timestamp and filenames from the backup output
 timestamp=$(echo "$backup_output" | awk '/Backup Summary for/ {print $6, $7}' ) # Extracts timestamp
 config_file=$(echo "$backup_output" | awk '/Config/ {print $3}'  | xargs basename)               # Extracts config file
 database_file=$(echo "$backup_output" | awk '/Database/ {print $2}' | xargs basename)
@@ -59,25 +60,14 @@ echo "Database File: $database_file"
 echo "Public File: $public_file"
 echo "Private File: $private_file"
 
-# Create  the new site
-
-ssh $ssh_user@$new_server "cd ~/frappe-bench && \
-    bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password  && \
-    bench --site $new_site install-app erpnext && \
-    bench --site $new_site install-app hrms"
-
-
-
-# Copy the backup files from old server to new server
-ssh $ssh_user@$old_server "scp ~/frappe-bench/sites/$old_site/private/backups/* $ssh_user@$new_server:~/frappe-bench/sites/$new_site/private"
-
-
-
-    check_success "Backup"
+check_success "Backup"
 }
 
-
-
+# function to Copy the backup files from old server to new server
+copy_files(){
+ssh $ssh_user@$old_server "scp ~/frappe-bench/sites/$old_site/private/backups/* $ssh_user@$new_server:~/frappe-bench/sites/$new_site/private"
+check_success "Copying files"
+}
 # Function to perform restore and migration
 perform_migration() {
     ssh $ssh_user@$new_server "cd ~/frappe-bench && \
@@ -122,7 +112,9 @@ clean_backup() {
 }
 
 # Call functions
+create_new_site
 perform_backup
+copy_files
 perform_migration
 copy_encryption_key
 clean_backup
