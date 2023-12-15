@@ -99,16 +99,16 @@ copy_encryption_key() {
     # Check if the key exists in the destination file on the remote server
     if ssh $ssh_user@$new_server "grep -q '\"$key\"' \"$dest_file\""; then
         # If the key exists, replace its value in the destination JSON file
-        ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/g' $dest_file"
+        ssh $ssh_user@$new_server "sed -i 's/\"$key\":\\s*\".*\"/\"$key\": \"$value\"/' $dest_file"
         echo "Replaced key '$key' with value '$value' in $dest_file"
     else
-        # Insert the key-value pair into the destination JSON file before the last curly brace
-        ssh $ssh_user@$new_server "sed -i '/}/i \ \ \ \ \"$key\": \"$value\"' $dest_file"
+        # Insert the key-value pair into the destination JSON file after the previous line
+        ssh $ssh_user@$new_server "sed -i '/\"encryption_key\":/s/$/,/' $dest_file && sed -i '\$s/}/,\n  \"$key\": \"$value\"\n}/' $dest_file"
         echo "Appended key '$key' with value '$value' to $dest_file"
     fi
 
     check_success "Copying Encryption Key"
-}
+} 
 
 # Function to clean up backups
 clean_backup() {
