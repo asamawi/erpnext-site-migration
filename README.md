@@ -6,6 +6,14 @@ This script automates the migration of ERPNext sites between servers. Ensure you
 - Ensure you have access to both the old and new servers.
 - Set up the `config.sh` file with sensitive information (server IPs, SSH user) needed for the migration script.
 
+```
+export OLD_SERVER="x.x.x.x" # IP address for old server
+export NEW_SERVER="x.x.x.x" # IP address for new server
+export SSH_USER="frappe" # ssh user that has been set for frappe and erpnext
+export DB_ROOT_PASSWORD="you database passowrd!"
+export ADMIN_PASSWORD="ERPNEXT Adminstrator Password!"
+```
+
 ## Usage:
 - **Syntax:** `./migration_script.sh <old_site_name> [<new_site_name>]`
 - Provide one site name for migration or both old and new site names.
