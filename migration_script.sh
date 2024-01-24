@@ -17,6 +17,7 @@ ssh_user=$SSH_USER
 db_root_password=$DB_ROOT_PASSWORD
 admin_password=$ADMIN_PASSWORD
 old_site=$1
+legacy_app=$LEGACY_APP
 if [ $# -eq 1 ]; then
     new_site=$old_site
 else
@@ -42,6 +43,7 @@ check_success "New Site Creation"
 perform_backup() {
     # Run the backup command and capture the output
     backup_output=$(ssh $ssh_user@$old_server "cd ~/frappe-bench && \
+        bench --site $old_site uninstall-app $legacy_app && \
         bench --site $old_site disable-scheduler && \
         bench --site $old_site set-maintenance-mode on && \
         bench --site $old_site backup --with-files --compress")
