@@ -9,7 +9,7 @@ This script automates the migration of ERPNext sites between servers. Ensure you
 ```
 export OLD_SERVER="x.x.x.x" # IP address for old server
 export NEW_SERVER="x.x.x.x" # IP address for new server
-export SSH_USER="frappe" # ssh user that has been set for frappe and erpnext
+export SSH_USER="username" # ssh user that has been set for frappe and erpnext
 export DB_ROOT_PASSWORD="you database passowrd!"
 export ADMIN_PASSWORD="ERPNEXT Adminstrator Password!"
 ```
