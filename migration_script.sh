@@ -73,12 +73,12 @@ check_success "Copying files"
 perform_migration() {
     ssh $ssh_user@$new_server "cd ~/frappe-bench && \
         bench --site $new_site --force restore sites/$new_site/private/$database_file --db-root-password $db_root_password && \
-        bench --site $new_site migrate &&
-        bench --site $new_site install-app hrms &&
-        tar xzvf sites/$new_site/private/$private_file &&
-        tar xzvf sites/$new_site/private/$public_file &&
-        mv $old_site/private/files/* sites/$new_site/private/files/ &&
-        mv $old_site/public/files/* sites/$new_site/public/files/ &&
+        bench --site $new_site migrate && \
+        bench --site $new_site install-app hrms && \
+        tar xzvf sites/$new_site/private/$private_file && \
+        tar xzvf sites/$new_site/private/$public_file && \
+        mv $old_site/private/files/* sites/$new_site/private/files/ && \
+        mv $old_site/public/files/* sites/$new_site/public/files/ && \
         rm -r $old_site/"
     check_success "Restore and Migration"
 }
