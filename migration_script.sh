@@ -28,15 +28,14 @@ fi
 check_success() {
     if [ $? -ne 0 ]; then
         echo "Error: $1 failed. Exiting..."
-        exit 1
+        exit 1 
     fi
 }
 # function to Create the new site
 create_new_site() {
 ssh $ssh_user@$new_server "cd ~/frappe-bench && \
     bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password  && \
-    bench --site $new_site install-app erpnext && \
-    bench --site $new_site install-app hrms"
+    bench --site $new_site install-app erpnext hrms"
 check_success "New Site Creation"
 }
 # Function to perform backup
