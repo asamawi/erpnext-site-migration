@@ -43,7 +43,7 @@ check_success "New Site Creation"
 perform_backup() {
     # Run the backup command and capture the output
     backup_output=$(ssh $ssh_user@$old_server "cd ~/frappe-bench && \
-        bench --site $old_site uninstall-app $legacy_app && \
+        bench --site $old_site uninstall-app $legacy_app -y && \
         bench --site $old_site disable-scheduler && \
         bench --site $old_site set-maintenance-mode on && \
         bench --site $old_site backup --with-files --compress")
