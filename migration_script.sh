@@ -31,6 +31,45 @@ check_success() {
         exit 1
     fi
 }
+# Function to test SSH connectivity between servers
+test_ssh_connectivity() {
+    echo "Testing SSH connectivity..."
+
+    # Test SSH connection to the old server
+    ssh -o BatchMode=yes -o ConnectTimeout=5 $ssh_user@$old_server "echo SSH to old server successful" &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to connect to old server ($old_server) via SSH. Aborting."
+        exit 1
+    else
+        echo "SSH connection to old server ($old_server) successful."
+    fi
+
+    # Test SSH connection to the new server
+    ssh -o BatchMode=yes -o ConnectTimeout=5 $ssh_user@$new_server "echo SSH to new server successful" &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to connect to new server ($new_server) via SSH. Aborting."
+        exit 1
+    else
+        echo "SSH connection to new server ($new_server) successful."
+    fi
+
+    check_success "SSH Connectivity Test"
+}
+# Function to test SSH connectivity from the old server to the new server
+test_ssh_from_old_to_new() {
+    echo "Testing SSH connectivity from $old_server to $new_server..."
+
+    # Run SSH command from old server to new server
+    ssh $ssh_user@$old_server "ssh -o BatchMode=yes -o ConnectTimeout=5 $ssh_user@$new_server 'echo SSH from old server to new server successful'" &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to connect from old server ($old_server) to new server ($new_server) via SSH. Aborting."
+        exit 1
+    else
+        echo "SSH connectivity from old server ($old_server) to new server ($new_server) successful."
+    fi
+
+    check_success "SSH Connectivity Test from Old to New Server"
+}
 # function to Create the new site
 create_new_site() {
 ssh $ssh_user@$new_server "cd ~/frappe-bench && \
@@ -118,6 +157,8 @@ clean_backup() {
 }
 
 # Call functions
+test_ssh_connectivity
+test_ssh_from_old_to_new
 create_new_site
 perform_backup
 copy_files
