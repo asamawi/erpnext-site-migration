@@ -167,4 +167,4 @@ clean_backup
 # Step 4: Setup Let's Encrypt SSL Certificate
 # ...
 
-echo "Migration for $old_site completed successfully."
+echo "Copying for $old_site completed successfully."
