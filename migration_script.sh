@@ -11,10 +11,11 @@ source config.sh
 skip_backup=false
 skip_copy=false
 extract_only=false
+skip_preparation=false
 
 # Check if one or two site names are provided as arguments
-if [ $# -lt 1 ] || [ $# -gt 5 ]; then
-    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy] [--extract-only]"
+if [ $# -lt 1 ] || [ $# -gt 6 ]; then
+    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy] [--extract-only] [--skip-preparation]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
@@ -35,6 +36,7 @@ while [[ "$#" -gt 0 ]]; do
         --skip-backup) skip_backup=true; shift ;;
         --skip-copy) skip_copy=true; shift ;;
         --extract-only) extract_only=true; shift ;;
+        --skip-preparation) skip_preparation=true; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
 done
@@ -122,6 +124,15 @@ create_new_site() {
     check_success "New Site Creation"
 }
 
+# Function to prepare the site for final migration
+prepare_site_for_final_migration() {
+    echo "Preparing site for final migration on $old_server..."
+    ssh -t $ssh_user@$old_server "cd ~/frappe-bench && \
+        bench --site $old_site disable-scheduler && \
+        bench --site $old_site set-maintenance-mode on"
+    check_success "Prepare Site for Final Migration"
+}
+
 # Function to perform backup
 perform_backup() {
     echo "Starting backup process on $old_server..."
@@ -133,12 +144,14 @@ perform_backup() {
         uninstall_cmd+="bench --site $old_site uninstall-app $app -y && "
     done
 
+    if [ "$skip_preparation" = false ]; then
+        prepare_site_for_final_migration
+    fi
+
     echo "Performing backup operations..."
     # Run the backup command and capture the output
     backup_output=$(ssh -t $ssh_user@$old_server "cd ~/frappe-bench && \
         $uninstall_cmd \
-        bench --site $old_site disable-scheduler && \
-        bench --site $old_site set-maintenance-mode on && \
         bench --site $old_site backup --with-files --compress")
 
     # Extract timestamp and filenames from the backup output
