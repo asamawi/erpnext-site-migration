@@ -7,6 +7,18 @@ if [ ! -f config.sh ]; then
 fi
 source config.sh
 
+# Initialize skip_backup flag
+skip_backup=false
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --skip-backup) skip_backup=true ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 # Check if one or two site names are provided as arguments
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
     echo "Usage: $0 <old_site_name> [<new_site_name>]"
@@ -149,8 +161,7 @@ copy_files(){
 }
 
 # Function to perform restore and migration
-perform_migration() {
-    echo "Starting restore and migration process on $new_server..."
+restore_and_migrate() {
     ssh -t $ssh_user@$new_server "cd ~/frappe-bench && \
         bench --site $new_site --force restore sites/$new_site/private/$database_file --db-root-password $db_root_password && \
         bench --site $new_site migrate && \
@@ -206,9 +217,17 @@ echo "-----------------------------------"
 test_ssh_connectivity
 test_ssh_from_old_to_new
 create_new_site
-perform_backup
+
+# Main script execution
+if [ "$skip_backup" = false ]; then
+    echo "Creating backup..."
+    perform_backup
+else
+    echo "Skipping backup as per user request..."
+fi
+
 copy_files
-perform_migration
+restore_and_migrate
 copy_encryption_key
 clean_backup
 
