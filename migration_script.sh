@@ -111,8 +111,15 @@ create_new_site() {
     
     # Create new site command
     create_site_cmd="cd ~/frappe-bench && bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password"
-    
-    # Install apps command
+
+    # Execute commands
+    ssh -t $ssh_user@$new_server "$create_site_cmd"
+    check_success "New Site Creation"
+}
+
+# Function to install apps
+install_apps() {
+    echo "Installing apps on $new_site..."
     install_apps_cmd=""
     for app in "${APPS_TO_INSTALL[@]}"; do
         echo "Will install app: $app"
@@ -120,8 +127,8 @@ create_new_site() {
     done
 
     # Execute commands
-    ssh -t $ssh_user@$new_server "$create_site_cmd$install_apps_cmd"
-    check_success "New Site Creation"
+    ssh -t $ssh_user@$new_server "cd ~/frappe-bench && $install_apps_cmd"
+    check_success "App Installation"
 }
 
 # Function to prepare the site for final migration
@@ -278,6 +285,7 @@ else
 fi
 
 restore_database
+install_apps
 extract_files
 copy_encryption_key
 clean_backup
