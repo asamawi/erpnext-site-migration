@@ -155,7 +155,7 @@ perform_backup() {
 # function to Copy the backup files from old server to new server
 copy_files(){
     echo "Copying backup files from $old_server to $new_server..."
-    ssh -t $ssh_user@$old_server "scp -v ~/frappe-bench/sites/$old_site/private/backups/* $ssh_user@$new_server:~/frappe-bench/sites/$new_site/private"
+    ssh -t $ssh_user@$old_server "scp -v ~/frappe-bench/sites/$old_site/private/backups/* $ssh_user@$new_server:~/frappe-bench/sites/$new_site/private/backups/"
     check_success "Copying files"
 }
 
