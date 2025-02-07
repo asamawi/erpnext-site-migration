@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Load sensitive information from config.sh
+if [ ! -f config.sh ]; then
+    echo "Error: config.sh file not found!"
+    exit 1
+fi
 source config.sh
 
 # Check if one or two site names are provided as arguments
@@ -62,9 +66,27 @@ test_ssh_from_old_to_new() {
     ssh $ssh_user@$old_server "ssh -o BatchMode=yes -o ConnectTimeout=5 $ssh_user@$new_server 'echo ✓ SSH from old server to new server successful'"
     check_success "SSH Connectivity Test from Old to New Server"
 }
+# Function to check if the site already exists on the new server
+check_site_exists() {
+    echo "Checking if site '$new_site' already exists on $new_server..."
+    
+    # Check if the site directory exists
+    ssh $ssh_user@$new_server "[ -d ~/frappe-bench/sites/$new_site ]"
+    if [ $? -eq 0 ]; then
+        echo "✓ Site '$new_site' already exists on $new_server. Skipping site creation."
+        return 1  # Indicate that the site already exists
+    else
+        echo "Site '$new_site' does not exist. Proceeding with creation..."
+        return 0  # Indicate that the site does not exist
+    fi
+}
 
 # function to Create the new site
 create_new_site() {
+    check_site_exists
+    if [ $? -eq 1 ]; then
+        return  # Skip site creation if it already exists
+    fi
     echo "Creating new site on $new_server..."
     
     # Create new site command
