@@ -234,7 +234,7 @@ else
     timestamp=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | head -n 1 | awk -F'_' '{print \$1}'")
     config_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'site_config_backup' | head -n 1")
     database_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'database.sql.gz' | head -n 1")
-    public_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep -E '[^private-]files.tgz$' | head -n 1")
+    public_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep -E '^[0-9]+_[0-9]+-.*-files.tgz$' | grep -v 'private-files.tgz' | head -n 1")
     private_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'private-files.tgz' | head -n 1")
 
     # Echo the values of the variables
