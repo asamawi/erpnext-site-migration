@@ -17,7 +17,7 @@ export LEGACY_APPS=("legacy_app1" "legacy_app2") # List of legacy apps to uninst
 ```
 
 ## Usage:
-- **Syntax:** `./migration_script.sh <old_site_name> [<new_site_name>] [--skip-backup]`
+- **Syntax:** `./migration_script.sh [--skip-backup] <old_site_name> [<new_site_name>]`
 - Provide one site name for migration or both old and new site names.
 - Example: `./migration_script.sh old_site_name new_site_name`
 - Use the `--skip-backup` option to skip the backup creation step if the backup has already been created during a previous attempt.

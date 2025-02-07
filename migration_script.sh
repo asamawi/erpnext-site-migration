@@ -13,15 +13,14 @@ skip_backup=false
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --skip-backup) skip_backup=true ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+        --skip-backup) skip_backup=true; shift ;;
+        *) break ;;
     esac
-    shift
 done
 
 # Check if one or two site names are provided as arguments
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-    echo "Usage: $0 <old_site_name> [<new_site_name>]"
+    echo "Usage: $0 [--skip-backup] <old_site_name> [<new_site_name>]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
