@@ -179,8 +179,8 @@ restore_database() {
 extract_files() {
     echo "Extracting files on $new_server..."
     ssh -t $ssh_user@$new_server "cd ~/frappe-bench && \
-        tar --strip-components=2 -xzf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
-        tar --strip-components=2 -xzf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
+        tar --strip-components=3 -xzf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
+        tar --strip-components=3 -xzf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
         rsync -av --ignore-existing sites/$old_site/private/files/ sites/$new_site/private/files/ && \
         rsync -av --ignore-existing sites/$old_site/public/files/ sites/$new_site/public/files/"
     check_success "File Extraction"
