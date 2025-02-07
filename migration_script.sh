@@ -17,7 +17,6 @@ ssh_user=$SSH_USER
 db_root_password=$DB_ROOT_PASSWORD
 admin_password=$ADMIN_PASSWORD
 old_site=$1
-legacy_app=$LEGACY_APP
 if [ $# -eq 1 ]; then
     new_site=$old_site
 else
@@ -72,10 +71,9 @@ test_ssh_from_old_to_new() {
 }
 # function to Create the new site
 create_new_site() {
-
     # Create new site command
     create_site_cmd="cd ~/frappe-bench && bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password"
-
+    
     # Install apps command
     install_apps_cmd=""
     for app in "${APPS_TO_INSTALL[@]}"; do
@@ -85,13 +83,18 @@ create_new_site() {
     # Execute commands
     ssh $ssh_user@$new_server "$create_site_cmd$install_apps_cmd"
     check_success "New Site Creation"
-
 }
 # Function to perform backup
 perform_backup() {
+    # Build uninstall commands for legacy apps
+    uninstall_cmd=""
+    for app in "${LEGACY_APPS[@]}"; do
+        uninstall_cmd+="bench --site $old_site uninstall-app $app -y && "
+    done
+
     # Run the backup command and capture the output
     backup_output=$(ssh $ssh_user@$old_server "cd ~/frappe-bench && \
-        bench --site $old_site uninstall-app $legacy_app -y && \
+        $uninstall_cmd \
         bench --site $old_site disable-scheduler && \
         bench --site $old_site set-maintenance-mode on && \
         bench --site $old_site backup --with-files --compress")
@@ -178,6 +181,5 @@ clean_backup
 # Step 3: Update DNS Records
 # Step 4: Setup Let's Encrypt SSL Certificate
 # ...
-
 
 echo "Migration for $old_site completed successfully."
