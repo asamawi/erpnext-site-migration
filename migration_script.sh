@@ -120,14 +120,14 @@ create_new_site() {
 # Function to install apps
 install_apps() {
     echo "Installing apps on $new_site..."
-    install_apps_cmd=""
+    install_apps_cmd="cd ~/frappe-bench"
     for app in "${APPS_TO_INSTALL[@]}"; do
         echo "Will install app: $app"
         install_apps_cmd+=" && bench --site $new_site install-app $app"
     done
 
     # Execute commands
-    ssh -t $ssh_user@$new_server "cd ~/frappe-bench && $install_apps_cmd"
+    ssh -t $ssh_user@$new_server "$install_apps_cmd"
     check_success "App Installation"
 }
 
