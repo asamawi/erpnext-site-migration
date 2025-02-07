@@ -173,8 +173,7 @@ restore_and_migrate() {
         tar xzvf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
         tar xzvf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
         rsync -av --ignore-existing sites/$old_site/private/files/ sites/$new_site/private/files/ && \
-        rsync -av --ignore-existing sites/$old_site/public/files/ sites/$new_site/public/files/ && \
-        rm -r sites/$old_site/"
+        rsync -av --ignore-existing sites/$old_site/public/files/ sites/$new_site/public/files/"
     check_success "Restore and Migration"
 }
 
