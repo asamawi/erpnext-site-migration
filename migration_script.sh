@@ -233,9 +233,9 @@ else
     # Manually set the variables needed for restore and migration
     timestamp=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | head -n 1 | awk -F'_' '{print \$1}'")
     config_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'site_config_backup' | head -n 1")
-    database_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'database_backup' | head -n 1")
-    public_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files_backup' | grep 'public' | head -n 1")
-    private_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files_backup' | grep 'private' | head -n 1")
+    database_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'database.sql.gz' | head -n 1")
+    public_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files.tgz' | grep 'public' | head -n 1")
+    private_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files.tgz' | grep 'private' | head -n 1")
 
     # Echo the values of the variables
     echo "  Timestamp: $timestamp"
