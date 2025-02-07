@@ -235,12 +235,19 @@ copy_encryption_key() {
 clean_backup() {
     echo "Cleaning up backup files..."
     # Remove all files inside the backups directory on the old server
-    #ssh frappe@$old_server "rm -rf ~/frappe-bench/sites/$old_site/private/backups/*"
+    ssh $ssh_user@$old_server "rm -rf ~/frappe-bench/sites/$old_site/private/backups/*"
+    check_success "Cleaning Backup on Old Server"
 
-    # Remove all files except 'files' and 'backups' directories on the new server
-    #ssh frappe@$new_server "find ~/frappe-bench/sites/$new_site/private/ -mindepth 1 -maxdepth 1 ! -name 'files' ! -name 'backups' -exec rm -rf {} +"
+    # Remove all files inside the backups directory on the new server
+    ssh $ssh_user@$new_server "rm -rf ~/frappe-bench/sites/$new_site/private/backups/*"
+    check_success "Cleaning Backup on New Server"
+}
 
-    check_success "Cleaning Backup"
+# Function to enable scheduler
+enable_scheduler() {
+    echo "Enabling scheduler on $new_server for site $new_site..."
+    ssh -t $ssh_user@$new_server "cd ~/frappe-bench && bench --site $new_site enable-scheduler"
+    check_success "Enable Scheduler"
 }
 
 echo "Starting migration process..."
@@ -296,6 +303,7 @@ install_apps
 extract_files
 copy_encryption_key
 clean_backup
+enable_scheduler
 
 # Step 3: Update DNS Records
 # Step 4: Setup Let's Encrypt SSL Certificate
