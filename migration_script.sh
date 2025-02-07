@@ -72,10 +72,20 @@ test_ssh_from_old_to_new() {
 }
 # function to Create the new site
 create_new_site() {
-ssh $ssh_user@$new_server "cd ~/frappe-bench && \
-    bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password  && \
-    bench --site $new_site install-app erpnext"
-check_success "New Site Creation"
+
+    # Create new site command
+    create_site_cmd="cd ~/frappe-bench && bench new-site $new_site --db-root-password $db_root_password --admin-password $admin_password"
+
+    # Install apps command
+    install_apps_cmd=""
+    for app in "${APPS_TO_INSTALL[@]}"; do
+        install_apps_cmd+=" && bench --site $new_site install-app $app"
+    done
+
+    # Execute commands
+    ssh $ssh_user@$new_server "$create_site_cmd$install_apps_cmd"
+    check_success "New Site Creation"
+
 }
 # Function to perform backup
 perform_backup() {
@@ -113,7 +123,6 @@ perform_migration() {
     ssh $ssh_user@$new_server "cd ~/frappe-bench && \
         bench --site $new_site --force restore sites/$new_site/private/$database_file --db-root-password $db_root_password && \
         bench --site $new_site migrate && \
-        bench --site $new_site install-app hrms && \
         tar xzvf sites/$new_site/private/$private_file && \
         tar xzvf sites/$new_site/private/$public_file && \
         mv $old_site/private/files/* sites/$new_site/private/files/ && \
@@ -169,5 +178,6 @@ clean_backup
 # Step 3: Update DNS Records
 # Step 4: Setup Let's Encrypt SSL Certificate
 # ...
+
 
 echo "Migration for $old_site completed successfully."

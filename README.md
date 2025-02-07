@@ -12,6 +12,9 @@ export NEW_SERVER="x.x.x.x" # IP address for new server
 export SSH_USER="username" # ssh user that has been set for frappe and erpnext
 export DB_ROOT_PASSWORD="you database passowrd!"
 export ADMIN_PASSWORD="ERPNEXT Adminstrator Password!"
+export APPS_TO_INSTALL=("erpnext" "hrms") # List of apps to install on the new site
+export LEGACY_APP="legacy_app_name" # Name of the legacy app to uninstall before backup
+
 ```
 
 ## Usage:
@@ -22,7 +25,7 @@ export ADMIN_PASSWORD="ERPNEXT Adminstrator Password!"
 ## Script Execution:
 The script performs the following:
 - Backs up the old site from the old server.
-- Creates a new site with ERPNext and HRMS apps on the new server.
+- Creates a new site with specified apps on the new server.
 - Copies the backup files from the old server to the new server.
 - Restores the database and performs site migration on the new server.
 - Copies the encryption key from the old site's config to the new site's config.
@@ -35,3 +38,4 @@ Additional steps might include updating DNS records and setting up SSL certifica
 
 ## Cleanup:
 - Review the migration logs and verify the success of the migration before removing any backups or old configurations.
+
