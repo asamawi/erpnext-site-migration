@@ -180,7 +180,7 @@ restore_and_migrate() {
 # Function to copy encryption key
 copy_encryption_key() {
     echo "Copying encryption key..."
-    source_file="/home/$ssh_user/frappe-bench/sites/$new_site/private/$config_file"
+    source_file="/home/$ssh_user/frappe-bench/sites/$new_site/private/backups/$config_file"
     dest_file="/home/$ssh_user/frappe-bench/sites/$new_site/site_config.json"
     key="encryption_key"
 
