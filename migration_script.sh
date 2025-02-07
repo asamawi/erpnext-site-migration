@@ -10,10 +10,11 @@ source config.sh
 # Initialize flags
 skip_backup=false
 skip_copy=false
+extract_only=false
 
 # Check if one or two site names are provided as arguments
-if [ $# -lt 1 ] || [ $# -gt 4 ]; then
-    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy]"
+if [ $# -lt 1 ] || [ $# -gt 5 ]; then
+    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy] [--extract-only]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
@@ -33,6 +34,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --skip-backup) skip_backup=true; shift ;;
         --skip-copy) skip_copy=true; shift ;;
+        --extract-only) extract_only=true; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
 done
@@ -164,17 +166,24 @@ copy_files(){
     check_success "Copying files"
 }
 
-# Function to perform restore and migration
-restore_and_migrate() {
-    echo "Restoring and migrating site on $new_server..."
+# Function to restore the database
+restore_database() {
+    echo "Restoring database on $new_server..."
     ssh -t $ssh_user@$new_server "cd ~/frappe-bench && \
         bench --site $new_site --force restore sites/$new_site/private/backups/$database_file --db-root-password $db_root_password && \
-        bench --site $new_site migrate && \
-        tar xzvf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
-        tar xzvf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
+        bench --site $new_site migrate"
+    check_success "Database Restore"
+}
+
+# Function to extract files
+extract_files() {
+    echo "Extracting files on $new_server..."
+    ssh -t $ssh_user@$new_server "cd ~/frappe-bench && \
+        tar --strip-components=2 -xzf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
+        tar --strip-components=2 -xzf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
         rsync -av --ignore-existing sites/$old_site/private/files/ sites/$new_site/private/files/ && \
         rsync -av --ignore-existing sites/$old_site/public/files/ sites/$new_site/public/files/"
-    check_success "Restore and Migration"
+    check_success "File Extraction"
 }
 
 # Function to copy encryption key
@@ -244,13 +253,19 @@ else
     echo "  Private File: $private_file"
 fi
 
+if [ "$extract_only" = true ]; then
+    extract_files
+    exit 0
+fi
+
 if [ "$skip_copy" = false ]; then
     copy_files
 else
     echo "Skipping file copy as per user request..."
 fi
 
-restore_and_migrate
+restore_database
+extract_files
 copy_encryption_key
 clean_backup
 
