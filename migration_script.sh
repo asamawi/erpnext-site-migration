@@ -161,14 +161,15 @@ copy_files(){
 
 # Function to perform restore and migration
 restore_and_migrate() {
+    echo "Restoring and migrating site on $new_server..."
     ssh -t $ssh_user@$new_server "cd ~/frappe-bench && \
-        bench --site $new_site --force restore sites/$new_site/private/$database_file --db-root-password $db_root_password && \
+        bench --site $new_site --force restore sites/$new_site/private/backups/$database_file --db-root-password $db_root_password && \
         bench --site $new_site migrate && \
-        tar xzvf sites/$new_site/private/$private_file && \
-        tar xzvf sites/$new_site/private/$public_file && \
-        rsync -av --ignore-existing $old_site/private/files/ sites/$new_site/private/files/ && \
-        rsync -av --ignore-existing $old_site/public/files/ sites/$new_site/public/files/ && \
-        rm -r $old_site/"
+        tar xzvf sites/$new_site/private/backups/$private_file -C sites/$new_site/private && \
+        tar xzvf sites/$new_site/private/backups/$public_file -C sites/$new_site/public && \
+        rsync -av --ignore-existing sites/$old_site/private/files/ sites/$new_site/private/files/ && \
+        rsync -av --ignore-existing sites/$old_site/public/files/ sites/$new_site/public/files/ && \
+        rm -r sites/$old_site/"
     check_success "Restore and Migration"
 }
 
