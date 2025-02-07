@@ -229,12 +229,20 @@ if [ "$skip_backup" = false ]; then
     perform_backup
 else
     echo "Skipping backup as per user request..."
+    echo "Manually setting the variables needed for restore and migration..."
     # Manually set the variables needed for restore and migration
     timestamp=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | head -n 1 | awk -F'_' '{print \$1}'")
     config_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'site_config_backup' | head -n 1")
     database_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'database_backup' | head -n 1")
     public_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files_backup' | grep 'public' | head -n 1")
     private_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files_backup' | grep 'private' | head -n 1")
+
+    # Echo the values of the variables
+    echo "  Timestamp: $timestamp"
+    echo "  Config File: $config_file"
+    echo "  Database File: $database_file"
+    echo "  Public File: $public_file"
+    echo "  Private File: $private_file"
 fi
 
 if [ "$skip_copy" = false ]; then
