@@ -11,34 +11,37 @@ source config.sh
 skip_backup=false
 skip_copy=false
 
-# Parse command-line arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --skip-backup) skip_backup=true; shift ;;
-        --skip-copy) skip_copy=true; shift ;;
-        *) break ;;
-    esac
-done
-
 # Check if one or two site names are provided as arguments
-if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-    echo "Usage: $0 [--skip-backup] [--skip-copy] <old_site_name> [<new_site_name>]"
+if [ $# -lt 1 ] || [ $# -gt 4 ]; then
+    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
 
 # Variables
+old_site=$1
+if [ $# -ge 2 ] && [[ $2 != --* ]]; then
+    new_site=$2
+    shift 2
+else
+    new_site=$old_site
+    shift 1
+fi
+
+# Parse optional arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --skip-backup) skip_backup=true; shift ;;
+        --skip-copy) skip_copy=true; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+done
+
 old_server=$OLD_SERVER
 new_server=$NEW_SERVER
 ssh_user=$SSH_USER
 db_root_password=$DB_ROOT_PASSWORD
 admin_password=$ADMIN_PASSWORD
-old_site=$1
-if [ $# -eq 1 ]; then
-    new_site=$old_site
-else
-    new_site=$2
-fi
 
 # Function to check if the last command was successful
 check_success() {
