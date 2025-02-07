@@ -12,10 +12,11 @@ skip_backup=false
 skip_copy=false
 extract_only=false
 skip_preparation=false
+skip_restore=false
 
 # Check if one or two site names are provided as arguments
 if [ $# -lt 1 ] || [ $# -gt 6 ]; then
-    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy] [--extract-only] [--skip-preparation]"
+    echo "Usage: $0 <old_site_name> [<new_site_name>] [--skip-backup] [--skip-copy] [--extract-only] [--skip-preparation] [--skip-restore]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
@@ -37,6 +38,7 @@ while [[ "$#" -gt 0 ]]; do
         --skip-copy) skip_copy=true; shift ;;
         --extract-only) extract_only=true; shift ;;
         --skip-preparation) skip_preparation=true; shift ;;
+        --skip-restore) skip_restore=true; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
 done
@@ -284,7 +286,12 @@ else
     echo "Skipping file copy as per user request..."
 fi
 
-restore_database
+if [ "$skip_restore" = false ]; then
+    restore_database
+else
+    echo "Skipping database restore as per user request..."
+fi
+
 install_apps
 extract_files
 copy_encryption_key
