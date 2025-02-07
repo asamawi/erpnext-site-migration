@@ -7,20 +7,22 @@ if [ ! -f config.sh ]; then
 fi
 source config.sh
 
-# Initialize skip_backup flag
+# Initialize flags
 skip_backup=false
+skip_copy=false
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --skip-backup) skip_backup=true; shift ;;
+        --skip-copy) skip_copy=true; shift ;;
         *) break ;;
     esac
 done
 
 # Check if one or two site names are provided as arguments
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-    echo "Usage: $0 [--skip-backup] <old_site_name> [<new_site_name>]"
+    echo "Usage: $0 [--skip-backup] [--skip-copy] <old_site_name> [<new_site_name>]"
     echo "Please provide one site name for migration or both old and new site names."
     exit 1
 fi
@@ -232,7 +234,12 @@ else
     private_file=$(ssh $ssh_user@$old_server "ls -t ~/frappe-bench/sites/$old_site/private/backups | grep 'files_backup' | grep 'private' | head -n 1")
 fi
 
-copy_files
+if [ "$skip_copy" = false ]; then
+    copy_files
+else
+    echo "Skipping file copy as per user request..."
+fi
+
 restore_and_migrate
 copy_encryption_key
 clean_backup
